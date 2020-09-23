@@ -20,27 +20,47 @@ Header structure:
 	Data length: 4 bytes
 '''
 
+
+class Header:
+	def __init__(self, event_number, timestamp, channel_length, data_length):
+		self.event_number = event_number
+		self.timestamp = timestamp
+		self.channel_length = channel_length
+		self.data_length = data_length
+
+
 class Event:
-	def __init__(self, file=None):
-		self.event_number = None
-		self.timestamp = None
+	def __init__(self, file):
+		self.file = file
+
+		self.header_idx = None
+
+		self.header = None
 		self.channel = None
 		self.data = None
-		if file:
-			self.read(file)
-	
-	def read(self, f):
-		syncword = f.read(4)
+
+	def read(self, read_data=True):
+		self.header_idx = self.file.tell()
+
+		# Ensure syncword
+		syncword = self.file.read(4)
 		assert syncword == LCM_SYNCWORD
-		
-		self.event_number = int.from_bytes(f.read(EVENT_NUMBER_BYTES), 'big')
-		self.timestamp = int.from_bytes(f.read(TIMESTAMP_BYTES), 'big')
-		
-		channel_length = int.from_bytes(f.read(CHANNEL_LENGTH_BYTES), 'big')
-		data_length = int.from_bytes(f.read(DATA_LENGTH_BYTES), 'big')
-		
-		self.channel = f.read(channel_length).decode()
-		self.data = f.read(data_length)
+
+		# Read header data
+		event_number = int.from_bytes(self.file.read(EVENT_NUMBER_BYTES), 'big')
+		timestamp = int.from_bytes(self.file.read(TIMESTAMP_BYTES), 'big')
+		channel_length = int.from_bytes(self.file.read(CHANNEL_LENGTH_BYTES), 'big')
+		data_length = int.from_bytes(self.file.read(DATA_LENGTH_BYTES), 'big')
+		self.header = Header(event_number, timestamp, channel_length, data_length)
+
+		# Read channel
+		self.channel = self.file.read(channel_length).decode()
+
+		# Read data if read_data is True, else seek past data
+		if read_data:
+			self.data = self.file.read(data_length)
+		else:
+			self.file.seek(data_length, whence=1)
 		
 
 class LogReader:
@@ -51,18 +71,12 @@ class LogReader:
 	def __del__(self):
 		self.file.close()
 	
-	def __next__(self):
+	def next(self, read_data=True):
 		try:
-			return Event(self.file)
+			ev = Event(self.file)
+			ev.read(read_data=read_data)
 		except:
 			return None
-
-
-class EventIndex:
-	def __init__(self, event_number, timestamp, byte_index):
-		self.event_number = event_number
-		self.timestamp = timestamp
-		self.byte_index = byte_index
 
 
 class LogExtractor:
@@ -73,7 +87,6 @@ class LogExtractor:
 
 	def _index(self):
 		self.index.clear()
-		byte_idx = self.reader.file.tell()
-		while ev := next(self.reader):
-			self.index.append(EventIndex(ev.event_number, ev.timestamp, byte_idx))
-			byte_idx = self.reader.file.tell()
+		print('Indexing {}, this may take some time...'.format(self.reader.filepath))
+		while ev := self.reader.next(read_data=False):
+			self.index.append(ev)
