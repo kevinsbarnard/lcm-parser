@@ -56,3 +56,24 @@ class LogReader:
 			return Event(self.file)
 		except:
 			return None
+
+
+class EventIndex:
+	def __init__(self, event_number, timestamp, byte_index):
+		self.event_number = event_number
+		self.timestamp = timestamp
+		self.byte_index = byte_index
+
+
+class LogExtractor:
+	def __init__(self, filepath):
+		self.reader = LogReader(filepath)
+		self.index = []
+		self._index()
+
+	def _index(self):
+		self.index.clear()
+		byte_idx = self.reader.file.tell()
+		while ev := next(self.reader):
+			self.index.append(EventIndex(ev.event_number, ev.timestamp, byte_idx))
+			byte_idx = self.reader.file.tell()
