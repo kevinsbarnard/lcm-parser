@@ -3,6 +3,7 @@ EVENT_NUMBER_BYTES = 8
 TIMESTAMP_BYTES = 8
 CHANNEL_LENGTH_BYTES = 4
 DATA_LENGTH_BYTES = 4
+HEADER_BYTES = 4 + EVENT_NUMBER_BYTES + TIMESTAMP_BYTES + CHANNEL_LENGTH_BYTES + DATA_LENGTH_BYTES
 
 TEST_LOG = 'B:\\Projects\ML-Tracking\\20200720-21_RachelCarson_MiniROV\\lcmLogs.July.21.2020\\lcmlog-2020-07-21.00'
 
@@ -58,9 +59,17 @@ class Event:
 
 		# Read data if read_data is True, else seek past data
 		if read_data:
-			self.data = self.file.read(data_length)
+			self.read_data()
 		else:
-			self.file.seek(data_length, whence=1)
+			self.file.seek(self.file.tell() + data_length)
+
+	@property
+	def data_idx(self):
+		return self.header_idx + HEADER_BYTES + self.header.channel_length
+
+	def read_data(self):
+		self.file.seek(self.data_idx)
+		self.file.read(self.header.data_length)
 		
 
 class LogReader:
@@ -75,7 +84,9 @@ class LogReader:
 		try:
 			ev = Event(self.file)
 			ev.read(read_data=read_data)
-		except:
+			return ev
+		except Exception as e:
+			print(e)
 			return None
 
 
@@ -87,6 +98,5 @@ class LogExtractor:
 
 	def _index(self):
 		self.index.clear()
-		print('Indexing {}, this may take some time...'.format(self.reader.filepath))
 		while ev := self.reader.next(read_data=False):
 			self.index.append(ev)
