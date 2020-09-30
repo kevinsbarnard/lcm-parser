@@ -71,7 +71,7 @@ class Event:
 
 	def read_data(self):
 		self.file.seek(self.data_idx)
-		self.file.read(self.header.data_length)
+		self.data = self.file.read(self.header.data_length)
 		
 
 class LogReader:
