@@ -1,3 +1,5 @@
+# lcm_reader (lcm-parser)
+
 LCM_SYNCWORD = (0xEDA1DA01).to_bytes(4, 'big')
 EVENT_NUMBER_BYTES = 8
 TIMESTAMP_BYTES = 8
@@ -100,3 +102,12 @@ class LogExtractor:
 		self.index.clear()
 		while ev := self.reader.next(read_data=False):
 			self.index.append(ev)
+
+	def make_channel_map(self):
+		channel_map = dict()
+		for ev in self.index:
+			channel = ev.channel
+			if channel not in channel_map:
+				channel_map[channel] = []
+			channel_map[channel].append(ev)
+		return channel_map
