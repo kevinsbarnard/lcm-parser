@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class camera_cfg_t(object):
     __slots__ = ["gain", "exposure", "binning", "framerate", "exit_app"]
 
@@ -36,20 +37,24 @@ class camera_cfg_t(object):
         if buf.read(8) != camera_cfg_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return camera_cfg_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = camera_cfg_t()
         self.gain, self.exposure, self.binning, self.framerate, self.exit_app = struct.unpack(">iiiii", buf.read(20))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if camera_cfg_t in parents: return 0
         tmphash = (0xa9d746f8344af438) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -57,5 +62,5 @@ class camera_cfg_t(object):
         if camera_cfg_t._packed_fingerprint is None:
             camera_cfg_t._packed_fingerprint = struct.pack(">Q", camera_cfg_t._get_hash_recursive([]))
         return camera_cfg_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

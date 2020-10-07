@@ -11,6 +11,7 @@ import struct
 
 import mwt.bounding_box_t
 
+
 class bounding_box_list_t(object):
     __slots__ = ["utime", "num_boxes", "boxes", "model_name"]
 
@@ -32,7 +33,7 @@ class bounding_box_list_t(object):
             assert self.boxes[i0]._get_packed_fingerprint() == mwt.bounding_box_t._get_packed_fingerprint()
             self.boxes[i0]._encode_one(buf)
         __model_name_encoded = self.model_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__model_name_encoded)+1))
+        buf.write(struct.pack('>I', len(__model_name_encoded) + 1))
         buf.write(__model_name_encoded)
         buf.write(b"\0")
 
@@ -44,6 +45,7 @@ class bounding_box_list_t(object):
         if buf.read(8) != bounding_box_list_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return bounding_box_list_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -55,15 +57,18 @@ class bounding_box_list_t(object):
         __model_name_len = struct.unpack('>I', buf.read(4))[0]
         self.model_name = buf.read(__model_name_len)[:-1].decode('utf-8', 'replace')
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if bounding_box_list_t in parents: return 0
         newparents = parents + [bounding_box_list_t]
-        tmphash = (0x48ac9fddb1ad13c4+ mwt.bounding_box_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x48ac9fddb1ad13c4 + mwt.bounding_box_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -71,5 +76,5 @@ class bounding_box_list_t(object):
         if bounding_box_list_t._packed_fingerprint is None:
             bounding_box_list_t._packed_fingerprint = struct.pack(">Q", bounding_box_list_t._get_hash_recursive([]))
         return bounding_box_list_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

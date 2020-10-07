@@ -11,8 +11,10 @@ import struct
 
 import mwt.header_t
 
+
 class mini_rov_status_t(object):
-    __slots__ = ["header", "auto_head", "auto_vert", "adv_nav", "auto_head_sp", "auto_depth_sp", "x_pilot", "y_pilot", "z_pilot", "yaw_pilot", "x_effort", "y_effort", "z_effort", "yaw_effort"]
+    __slots__ = ["header", "auto_head", "auto_vert", "adv_nav", "auto_head_sp", "auto_depth_sp", "x_pilot", "y_pilot",
+                 "z_pilot", "yaw_pilot", "x_effort", "y_effort", "z_effort", "yaw_effort"]
 
     def __init__(self):
         self.header = mwt.header_t()
@@ -39,7 +41,9 @@ class mini_rov_status_t(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == mwt.header_t._get_packed_fingerprint()
         self.header._encode_one(buf)
-        buf.write(struct.pack(">bbbdddddddddd", self.auto_head, self.auto_vert, self.adv_nav, self.auto_head_sp, self.auto_depth_sp, self.x_pilot, self.y_pilot, self.z_pilot, self.yaw_pilot, self.x_effort, self.y_effort, self.z_effort, self.yaw_effort))
+        buf.write(struct.pack(">bbbdddddddddd", self.auto_head, self.auto_vert, self.adv_nav, self.auto_head_sp,
+                              self.auto_depth_sp, self.x_pilot, self.y_pilot, self.z_pilot, self.yaw_pilot,
+                              self.x_effort, self.y_effort, self.z_effort, self.yaw_effort))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -49,6 +53,7 @@ class mini_rov_status_t(object):
         if buf.read(8) != mini_rov_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return mini_rov_status_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -57,17 +62,21 @@ class mini_rov_status_t(object):
         self.auto_head = bool(struct.unpack('b', buf.read(1))[0])
         self.auto_vert = bool(struct.unpack('b', buf.read(1))[0])
         self.adv_nav = bool(struct.unpack('b', buf.read(1))[0])
-        self.auto_head_sp, self.auto_depth_sp, self.x_pilot, self.y_pilot, self.z_pilot, self.yaw_pilot, self.x_effort, self.y_effort, self.z_effort, self.yaw_effort = struct.unpack(">dddddddddd", buf.read(80))
+        self.auto_head_sp, self.auto_depth_sp, self.x_pilot, self.y_pilot, self.z_pilot, self.yaw_pilot, self.x_effort, self.y_effort, self.z_effort, self.yaw_effort = struct.unpack(
+            ">dddddddddd", buf.read(80))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if mini_rov_status_t in parents: return 0
         newparents = parents + [mini_rov_status_t]
-        tmphash = (0x9b1d97e89c2fdce+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x9b1d97e89c2fdce + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -75,5 +84,5 @@ class mini_rov_status_t(object):
         if mini_rov_status_t._packed_fingerprint is None:
             mini_rov_status_t._packed_fingerprint = struct.pack(">Q", mini_rov_status_t._get_hash_recursive([]))
         return mini_rov_status_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

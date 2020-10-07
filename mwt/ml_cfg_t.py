@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class ml_cfg_t(object):
     __slots__ = ["score_threshold", "box_deviation", "model_name", "framerate", "exit_app"]
 
@@ -28,7 +29,7 @@ class ml_cfg_t(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">ii", self.score_threshold, self.box_deviation))
         __model_name_encoded = self.model_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__model_name_encoded)+1))
+        buf.write(struct.pack('>I', len(__model_name_encoded) + 1))
         buf.write(__model_name_encoded)
         buf.write(b"\0")
         buf.write(struct.pack(">ii", self.framerate, self.exit_app))
@@ -41,6 +42,7 @@ class ml_cfg_t(object):
         if buf.read(8) != ml_cfg_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return ml_cfg_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -50,14 +52,17 @@ class ml_cfg_t(object):
         self.model_name = buf.read(__model_name_len)[:-1].decode('utf-8', 'replace')
         self.framerate, self.exit_app = struct.unpack(">ii", buf.read(8))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if ml_cfg_t in parents: return 0
         tmphash = (0x7cd89df23c4535ff) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -65,5 +70,5 @@ class ml_cfg_t(object):
         if ml_cfg_t._packed_fingerprint is None:
             ml_cfg_t._packed_fingerprint = struct.pack(">Q", ml_cfg_t._get_hash_recursive([]))
         return ml_cfg_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

@@ -11,6 +11,7 @@ import struct
 
 import mwt.bounding_box_list_t
 
+
 class stereo_bounding_box_t(object):
     __slots__ = ["publisher", "left_boxes", "right_boxes"]
 
@@ -27,7 +28,7 @@ class stereo_bounding_box_t(object):
 
     def _encode_one(self, buf):
         __publisher_encoded = self.publisher.encode('utf-8')
-        buf.write(struct.pack('>I', len(__publisher_encoded)+1))
+        buf.write(struct.pack('>I', len(__publisher_encoded) + 1))
         buf.write(__publisher_encoded)
         buf.write(b"\0")
         assert self.left_boxes._get_packed_fingerprint() == mwt.bounding_box_list_t._get_packed_fingerprint()
@@ -43,6 +44,7 @@ class stereo_bounding_box_t(object):
         if buf.read(8) != stereo_bounding_box_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return stereo_bounding_box_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -52,15 +54,19 @@ class stereo_bounding_box_t(object):
         self.left_boxes = mwt.bounding_box_list_t._decode_one(buf)
         self.right_boxes = mwt.bounding_box_list_t._decode_one(buf)
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if stereo_bounding_box_t in parents: return 0
         newparents = parents + [stereo_bounding_box_t]
-        tmphash = (0x469f948d1ed6a0f1+ mwt.bounding_box_list_t._get_hash_recursive(newparents)+ mwt.bounding_box_list_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x469f948d1ed6a0f1 + mwt.bounding_box_list_t._get_hash_recursive(
+            newparents) + mwt.bounding_box_list_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -68,5 +74,5 @@ class stereo_bounding_box_t(object):
         if stereo_bounding_box_t._packed_fingerprint is None:
             stereo_bounding_box_t._packed_fingerprint = struct.pack(">Q", stereo_bounding_box_t._get_hash_recursive([]))
         return stereo_bounding_box_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

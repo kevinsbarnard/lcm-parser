@@ -11,6 +11,7 @@ import struct
 
 import mwt.header_t
 
+
 class vehicle_cmd_t(object):
     __slots__ = ["header", "x", "y", "z", "phi", "theta", "psi"]
 
@@ -42,6 +43,7 @@ class vehicle_cmd_t(object):
         if buf.read(8) != vehicle_cmd_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return vehicle_cmd_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -49,15 +51,18 @@ class vehicle_cmd_t(object):
         self.header = mwt.header_t._decode_one(buf)
         self.x, self.y, self.z, self.phi, self.theta, self.psi = struct.unpack(">dddddd", buf.read(48))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if vehicle_cmd_t in parents: return 0
         newparents = parents + [vehicle_cmd_t]
-        tmphash = (0xba86a0c54fd80a1f+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0xba86a0c54fd80a1f + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -65,5 +70,5 @@ class vehicle_cmd_t(object):
         if vehicle_cmd_t._packed_fingerprint is None:
             vehicle_cmd_t._packed_fingerprint = struct.pack(">Q", vehicle_cmd_t._get_hash_recursive([]))
         return vehicle_cmd_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

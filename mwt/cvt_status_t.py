@@ -11,8 +11,12 @@ import struct
 
 import mwt.header_t
 
+
 class cvt_status_t(object):
-    __slots__ = ["header", "roi_width", "roi_height", "roi_left_age", "roi_right_age", "conf_left", "conf_right", "target_left_x", "target_left_y", "target_right_x", "target_right_y", "range_meters", "bearing_deg", "z_err_meters", "epi_error", "roi_reinit_cnt", "ext_target_rx_cnt", "target_left_located", "target_right_located"]
+    __slots__ = ["header", "roi_width", "roi_height", "roi_left_age", "roi_right_age", "conf_left", "conf_right",
+                 "target_left_x", "target_left_y", "target_right_x", "target_right_y", "range_meters", "bearing_deg",
+                 "z_err_meters", "epi_error", "roi_reinit_cnt", "ext_target_rx_cnt", "target_left_located",
+                 "target_right_located"]
 
     def __init__(self):
         self.header = mwt.header_t()
@@ -44,7 +48,12 @@ class cvt_status_t(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == mwt.header_t._get_packed_fingerprint()
         self.header._encode_one(buf)
-        buf.write(struct.pack(">ddddddddddddddqqbb", self.roi_width, self.roi_height, self.roi_left_age, self.roi_right_age, self.conf_left, self.conf_right, self.target_left_x, self.target_left_y, self.target_right_x, self.target_right_y, self.range_meters, self.bearing_deg, self.z_err_meters, self.epi_error, self.roi_reinit_cnt, self.ext_target_rx_cnt, self.target_left_located, self.target_right_located))
+        buf.write(
+            struct.pack(">ddddddddddddddqqbb", self.roi_width, self.roi_height, self.roi_left_age, self.roi_right_age,
+                        self.conf_left, self.conf_right, self.target_left_x, self.target_left_y, self.target_right_x,
+                        self.target_right_y, self.range_meters, self.bearing_deg, self.z_err_meters, self.epi_error,
+                        self.roi_reinit_cnt, self.ext_target_rx_cnt, self.target_left_located,
+                        self.target_right_located))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -54,24 +63,29 @@ class cvt_status_t(object):
         if buf.read(8) != cvt_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return cvt_status_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = cvt_status_t()
         self.header = mwt.header_t._decode_one(buf)
-        self.roi_width, self.roi_height, self.roi_left_age, self.roi_right_age, self.conf_left, self.conf_right, self.target_left_x, self.target_left_y, self.target_right_x, self.target_right_y, self.range_meters, self.bearing_deg, self.z_err_meters, self.epi_error, self.roi_reinit_cnt, self.ext_target_rx_cnt = struct.unpack(">ddddddddddddddqq", buf.read(128))
+        self.roi_width, self.roi_height, self.roi_left_age, self.roi_right_age, self.conf_left, self.conf_right, self.target_left_x, self.target_left_y, self.target_right_x, self.target_right_y, self.range_meters, self.bearing_deg, self.z_err_meters, self.epi_error, self.roi_reinit_cnt, self.ext_target_rx_cnt = struct.unpack(
+            ">ddddddddddddddqq", buf.read(128))
         self.target_left_located = bool(struct.unpack('b', buf.read(1))[0])
         self.target_right_located = bool(struct.unpack('b', buf.read(1))[0])
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if cvt_status_t in parents: return 0
         newparents = parents + [cvt_status_t]
-        tmphash = (0x5648ebd51c76ef84+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x5648ebd51c76ef84 + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -79,5 +93,5 @@ class cvt_status_t(object):
         if cvt_status_t._packed_fingerprint is None:
             cvt_status_t._packed_fingerprint = struct.pack(">Q", cvt_status_t._get_hash_recursive([]))
         return cvt_status_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

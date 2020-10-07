@@ -11,8 +11,10 @@ import struct
 
 import mwt.header_t
 
+
 class mwt_target_t(object):
-    __slots__ = ["header", "range_meters", "bearing_degrees", "z_meters", "range_valid", "bearing_valid", "z_valid", "left_pix_x", "left_pix_y", "right_pix_x", "right_pix_y"]
+    __slots__ = ["header", "range_meters", "bearing_degrees", "z_meters", "range_valid", "bearing_valid", "z_valid",
+                 "left_pix_x", "left_pix_y", "right_pix_x", "right_pix_y"]
 
     def __init__(self):
         self.header = mwt.header_t()
@@ -36,7 +38,9 @@ class mwt_target_t(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == mwt.header_t._get_packed_fingerprint()
         self.header._encode_one(buf)
-        buf.write(struct.pack(">dddbbbdddd", self.range_meters, self.bearing_degrees, self.z_meters, self.range_valid, self.bearing_valid, self.z_valid, self.left_pix_x, self.left_pix_y, self.right_pix_x, self.right_pix_y))
+        buf.write(struct.pack(">dddbbbdddd", self.range_meters, self.bearing_degrees, self.z_meters, self.range_valid,
+                              self.bearing_valid, self.z_valid, self.left_pix_x, self.left_pix_y, self.right_pix_x,
+                              self.right_pix_y))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -46,6 +50,7 @@ class mwt_target_t(object):
         if buf.read(8) != mwt_target_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return mwt_target_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -57,15 +62,18 @@ class mwt_target_t(object):
         self.z_valid = bool(struct.unpack('b', buf.read(1))[0])
         self.left_pix_x, self.left_pix_y, self.right_pix_x, self.right_pix_y = struct.unpack(">dddd", buf.read(32))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if mwt_target_t in parents: return 0
         newparents = parents + [mwt_target_t]
-        tmphash = (0xa8d333e2c0719be0+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0xa8d333e2c0719be0 + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -73,5 +81,5 @@ class mwt_target_t(object):
         if mwt_target_t._packed_fingerprint is None:
             mwt_target_t._packed_fingerprint = struct.pack(">Q", mwt_target_t._get_hash_recursive([]))
         return mwt_target_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

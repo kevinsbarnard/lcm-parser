@@ -11,8 +11,11 @@ import struct
 
 import mwt.header_t
 
+
 class ext_target_t(object):
-    __slots__ = ["header", "left_utime", "right_utime", "left_class_name", "right_class_name", "left_x", "left_y", "right_x", "right_y", "left_box_width", "left_box_height", "right_box_width", "right_box_height", "conf_left", "conf_right", "source"]
+    __slots__ = ["header", "left_utime", "right_utime", "left_class_name", "right_class_name", "left_x", "left_y",
+                 "right_x", "right_y", "left_box_width", "left_box_height", "right_box_width", "right_box_height",
+                 "conf_left", "conf_right", "source"]
 
     def __init__(self):
         self.header = mwt.header_t()
@@ -43,14 +46,16 @@ class ext_target_t(object):
         self.header._encode_one(buf)
         buf.write(struct.pack(">qq", self.left_utime, self.right_utime))
         __left_class_name_encoded = self.left_class_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__left_class_name_encoded)+1))
+        buf.write(struct.pack('>I', len(__left_class_name_encoded) + 1))
         buf.write(__left_class_name_encoded)
         buf.write(b"\0")
         __right_class_name_encoded = self.right_class_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__right_class_name_encoded)+1))
+        buf.write(struct.pack('>I', len(__right_class_name_encoded) + 1))
         buf.write(__right_class_name_encoded)
         buf.write(b"\0")
-        buf.write(struct.pack(">ddddddddddd", self.left_x, self.left_y, self.right_x, self.right_y, self.left_box_width, self.left_box_height, self.right_box_width, self.right_box_height, self.conf_left, self.conf_right, self.source))
+        buf.write(struct.pack(">ddddddddddd", self.left_x, self.left_y, self.right_x, self.right_y, self.left_box_width,
+                              self.left_box_height, self.right_box_width, self.right_box_height, self.conf_left,
+                              self.conf_right, self.source))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -60,6 +65,7 @@ class ext_target_t(object):
         if buf.read(8) != ext_target_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return ext_target_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -70,17 +76,21 @@ class ext_target_t(object):
         self.left_class_name = buf.read(__left_class_name_len)[:-1].decode('utf-8', 'replace')
         __right_class_name_len = struct.unpack('>I', buf.read(4))[0]
         self.right_class_name = buf.read(__right_class_name_len)[:-1].decode('utf-8', 'replace')
-        self.left_x, self.left_y, self.right_x, self.right_y, self.left_box_width, self.left_box_height, self.right_box_width, self.right_box_height, self.conf_left, self.conf_right, self.source = struct.unpack(">ddddddddddd", buf.read(88))
+        self.left_x, self.left_y, self.right_x, self.right_y, self.left_box_width, self.left_box_height, self.right_box_width, self.right_box_height, self.conf_left, self.conf_right, self.source = struct.unpack(
+            ">ddddddddddd", buf.read(88))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if ext_target_t in parents: return 0
         newparents = parents + [ext_target_t]
-        tmphash = (0x9de6ea0e2b79acb9+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x9de6ea0e2b79acb9 + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -88,5 +98,5 @@ class ext_target_t(object):
         if ext_target_t._packed_fingerprint is None:
             ext_target_t._packed_fingerprint = struct.pack(">Q", ext_target_t._get_hash_recursive([]))
         return ext_target_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

@@ -11,6 +11,7 @@ import struct
 
 import mwt.header_t
 
+
 class mini_rov_rowe_dvl_t(object):
     __slots__ = ["header", "ts_centi_sec", "x_vel_mm_sec", "y_vel_mm_sec", "z_vel_mm_sec", "altitude_mm"]
 
@@ -31,7 +32,8 @@ class mini_rov_rowe_dvl_t(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == mwt.header_t._get_packed_fingerprint()
         self.header._encode_one(buf)
-        buf.write(struct.pack(">ddddd", self.ts_centi_sec, self.x_vel_mm_sec, self.y_vel_mm_sec, self.z_vel_mm_sec, self.altitude_mm))
+        buf.write(struct.pack(">ddddd", self.ts_centi_sec, self.x_vel_mm_sec, self.y_vel_mm_sec, self.z_vel_mm_sec,
+                              self.altitude_mm))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -41,22 +43,27 @@ class mini_rov_rowe_dvl_t(object):
         if buf.read(8) != mini_rov_rowe_dvl_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return mini_rov_rowe_dvl_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = mini_rov_rowe_dvl_t()
         self.header = mwt.header_t._decode_one(buf)
-        self.ts_centi_sec, self.x_vel_mm_sec, self.y_vel_mm_sec, self.z_vel_mm_sec, self.altitude_mm = struct.unpack(">ddddd", buf.read(40))
+        self.ts_centi_sec, self.x_vel_mm_sec, self.y_vel_mm_sec, self.z_vel_mm_sec, self.altitude_mm = struct.unpack(
+            ">ddddd", buf.read(40))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if mini_rov_rowe_dvl_t in parents: return 0
         newparents = parents + [mini_rov_rowe_dvl_t]
-        tmphash = (0x7beb3c36942d60b7+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x7beb3c36942d60b7 + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -64,5 +71,5 @@ class mini_rov_rowe_dvl_t(object):
         if mini_rov_rowe_dvl_t._packed_fingerprint is None:
             mini_rov_rowe_dvl_t._packed_fingerprint = struct.pack(">Q", mini_rov_rowe_dvl_t._get_hash_recursive([]))
         return mini_rov_rowe_dvl_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

@@ -11,6 +11,7 @@ import struct
 
 import mwt.header_t
 
+
 class mini_rov_attitude_t(object):
     __slots__ = ["header", "roll_deg", "pitch_deg", "yaw_deg"]
 
@@ -39,6 +40,7 @@ class mini_rov_attitude_t(object):
         if buf.read(8) != mini_rov_attitude_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return mini_rov_attitude_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -46,15 +48,18 @@ class mini_rov_attitude_t(object):
         self.header = mwt.header_t._decode_one(buf)
         self.roll_deg, self.pitch_deg, self.yaw_deg = struct.unpack(">ddd", buf.read(24))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if mini_rov_attitude_t in parents: return 0
         newparents = parents + [mini_rov_attitude_t]
-        tmphash = (0x9f02cf94eb7c49f0+ mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0x9f02cf94eb7c49f0 + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -62,5 +67,5 @@ class mini_rov_attitude_t(object):
         if mini_rov_attitude_t._packed_fingerprint is None:
             mini_rov_attitude_t._packed_fingerprint = struct.pack(">Q", mini_rov_attitude_t._get_hash_recursive([]))
         return mini_rov_attitude_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

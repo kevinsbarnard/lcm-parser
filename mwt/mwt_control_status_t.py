@@ -19,8 +19,14 @@ import mwt.controller_status_t
 
 import mwt.trajectory_status_t
 
+
 class mwt_control_status_t(object):
-    __slots__ = ["header", "range_control", "lateral_control", "vertical_control", "bearing_control", "range_traj", "lateral_traj", "vertical_traj", "bearing_traj", "range_filter", "lateral_filter", "vertical_filter", "bearing_filter", "range_gs_filter", "heading_gs_filter", "bearing_gs_filter", "lateral_gs", "bearing_gs", "is_pilot_enabled", "is_control_enabled", "is_x_effort_enabled", "is_y_effort_enabled", "is_z_effort_enabled", "is_psi_effort_enabled", "control_exec_ms", "other_exec_ms", "percent_idle", "missed_updates"]
+    __slots__ = ["header", "range_control", "lateral_control", "vertical_control", "bearing_control", "range_traj",
+                 "lateral_traj", "vertical_traj", "bearing_traj", "range_filter", "lateral_filter", "vertical_filter",
+                 "bearing_filter", "range_gs_filter", "heading_gs_filter", "bearing_gs_filter", "lateral_gs",
+                 "bearing_gs", "is_pilot_enabled", "is_control_enabled", "is_x_effort_enabled", "is_y_effort_enabled",
+                 "is_z_effort_enabled", "is_psi_effort_enabled", "control_exec_ms", "other_exec_ms", "percent_idle",
+                 "missed_updates"]
 
     def __init__(self):
         self.header = mwt.header_t()
@@ -95,7 +101,9 @@ class mwt_control_status_t(object):
         self.lateral_gs._encode_one(buf)
         assert self.bearing_gs._get_packed_fingerprint() == mwt.gain_scale_status_t._get_packed_fingerprint()
         self.bearing_gs._encode_one(buf)
-        buf.write(struct.pack(">bbbbbbdddq", self.is_pilot_enabled, self.is_control_enabled, self.is_x_effort_enabled, self.is_y_effort_enabled, self.is_z_effort_enabled, self.is_psi_effort_enabled, self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates))
+        buf.write(struct.pack(">bbbbbbdddq", self.is_pilot_enabled, self.is_control_enabled, self.is_x_effort_enabled,
+                              self.is_y_effort_enabled, self.is_z_effort_enabled, self.is_psi_effort_enabled,
+                              self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -105,6 +113,7 @@ class mwt_control_status_t(object):
         if buf.read(8) != mwt_control_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return mwt_control_status_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -133,17 +142,35 @@ class mwt_control_status_t(object):
         self.is_y_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
         self.is_z_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
         self.is_psi_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
-        self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates = struct.unpack(">dddq", buf.read(32))
+        self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates = struct.unpack(">dddq",
+                                                                                                         buf.read(32))
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if mwt_control_status_t in parents: return 0
         newparents = parents + [mwt_control_status_t]
-        tmphash = (0xcfdb15991e731c60+ mwt.header_t._get_hash_recursive(newparents)+ mwt.controller_status_t._get_hash_recursive(newparents)+ mwt.controller_status_t._get_hash_recursive(newparents)+ mwt.controller_status_t._get_hash_recursive(newparents)+ mwt.controller_status_t._get_hash_recursive(newparents)+ mwt.trajectory_status_t._get_hash_recursive(newparents)+ mwt.trajectory_status_t._get_hash_recursive(newparents)+ mwt.trajectory_status_t._get_hash_recursive(newparents)+ mwt.trajectory_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.filter_status_t._get_hash_recursive(newparents)+ mwt.gain_scale_status_t._get_hash_recursive(newparents)+ mwt.gain_scale_status_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (0xcfdb15991e731c60 + mwt.header_t._get_hash_recursive(
+            newparents) + mwt.controller_status_t._get_hash_recursive(
+            newparents) + mwt.controller_status_t._get_hash_recursive(
+            newparents) + mwt.controller_status_t._get_hash_recursive(
+            newparents) + mwt.controller_status_t._get_hash_recursive(
+            newparents) + mwt.trajectory_status_t._get_hash_recursive(
+            newparents) + mwt.trajectory_status_t._get_hash_recursive(
+            newparents) + mwt.trajectory_status_t._get_hash_recursive(
+            newparents) + mwt.trajectory_status_t._get_hash_recursive(
+            newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(
+            newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(
+            newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(
+            newparents) + mwt.filter_status_t._get_hash_recursive(
+            newparents) + mwt.gain_scale_status_t._get_hash_recursive(
+            newparents) + mwt.gain_scale_status_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -151,5 +178,5 @@ class mwt_control_status_t(object):
         if mwt_control_status_t._packed_fingerprint is None:
             mwt_control_status_t._packed_fingerprint = struct.pack(">Q", mwt_control_status_t._get_hash_recursive([]))
         return mwt_control_status_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)

@@ -9,6 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
+
 class bounding_box_t(object):
     __slots__ = ["left", "top", "width", "height", "num_classes", "scores", "class_name"]
 
@@ -31,7 +32,7 @@ class bounding_box_t(object):
         buf.write(struct.pack(">ddddb", self.left, self.top, self.width, self.height, self.num_classes))
         buf.write(struct.pack('>%dd' % self.num_classes, *self.scores[:self.num_classes]))
         __class_name_encoded = self.class_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__class_name_encoded)+1))
+        buf.write(struct.pack('>I', len(__class_name_encoded) + 1))
         buf.write(__class_name_encoded)
         buf.write(b"\0")
 
@@ -43,6 +44,7 @@ class bounding_box_t(object):
         if buf.read(8) != bounding_box_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return bounding_box_t._decode_one(buf)
+
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -52,14 +54,17 @@ class bounding_box_t(object):
         __class_name_len = struct.unpack('>I', buf.read(4))[0]
         self.class_name = buf.read(__class_name_len)[:-1].decode('utf-8', 'replace')
         return self
+
     _decode_one = staticmethod(_decode_one)
 
     _hash = None
+
     def _get_hash_recursive(parents):
         if bounding_box_t in parents: return 0
         tmphash = (0x76416b29cdb9c76c) & 0xffffffffffffffff
-        tmphash  = (((tmphash<<1)&0xffffffffffffffff)  + (tmphash>>63)) & 0xffffffffffffffff
+        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
         return tmphash
+
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -67,5 +72,5 @@ class bounding_box_t(object):
         if bounding_box_t._packed_fingerprint is None:
             bounding_box_t._packed_fingerprint = struct.pack(">Q", bounding_box_t._get_hash_recursive([]))
         return bounding_box_t._packed_fingerprint
-    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
+    _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
