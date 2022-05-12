@@ -9,16 +9,37 @@ except ImportError:
     from io import BytesIO
 import struct
 
-
 class ml_cfg_t(object):
-    __slots__ = ["score_threshold", "box_deviation", "model_name", "framerate", "exit_app"]
+    __slots__ = ["score_threshold", "box_deviation", "reinit_threshold", "min_reinit_time", "max_epipolar_error", "model_name", "target_class", "tracker_type", "target_source", "box_combiner", "box_size_from_ml", "box_padding", "publish_mwt", "publish_ext", "box_size_x", "box_size_y", "rate_limit", "min_range", "max_range", "min_alt", "max_alt", "use_world_frame", "world_frame_timeout"]
+
+    __typenames__ = ["int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "string", "string", "string", "string", "string", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "int32_t", "double", "double", "double", "double", "double", "int32_t", "int32_t"]
+
+    __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 
     def __init__(self):
         self.score_threshold = 0
         self.box_deviation = 0
+        self.reinit_threshold = 0
+        self.min_reinit_time = 0
+        self.max_epipolar_error = 0
         self.model_name = ""
-        self.framerate = 0
-        self.exit_app = 0
+        self.target_class = ""
+        self.tracker_type = ""
+        self.target_source = ""
+        self.box_combiner = ""
+        self.box_size_from_ml = 0
+        self.box_padding = 0
+        self.publish_mwt = 0
+        self.publish_ext = 0
+        self.box_size_x = 0
+        self.box_size_y = 0
+        self.rate_limit = 0.0
+        self.min_range = 0.0
+        self.max_range = 0.0
+        self.min_alt = 0.0
+        self.max_alt = 0.0
+        self.use_world_frame = 0
+        self.world_frame_timeout = 0
 
     def encode(self):
         buf = BytesIO()
@@ -27,12 +48,28 @@ class ml_cfg_t(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ii", self.score_threshold, self.box_deviation))
+        buf.write(struct.pack(">iiiii", self.score_threshold, self.box_deviation, self.reinit_threshold, self.min_reinit_time, self.max_epipolar_error))
         __model_name_encoded = self.model_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__model_name_encoded) + 1))
+        buf.write(struct.pack('>I', len(__model_name_encoded)+1))
         buf.write(__model_name_encoded)
         buf.write(b"\0")
-        buf.write(struct.pack(">ii", self.framerate, self.exit_app))
+        __target_class_encoded = self.target_class.encode('utf-8')
+        buf.write(struct.pack('>I', len(__target_class_encoded)+1))
+        buf.write(__target_class_encoded)
+        buf.write(b"\0")
+        __tracker_type_encoded = self.tracker_type.encode('utf-8')
+        buf.write(struct.pack('>I', len(__tracker_type_encoded)+1))
+        buf.write(__tracker_type_encoded)
+        buf.write(b"\0")
+        __target_source_encoded = self.target_source.encode('utf-8')
+        buf.write(struct.pack('>I', len(__target_source_encoded)+1))
+        buf.write(__target_source_encoded)
+        buf.write(b"\0")
+        __box_combiner_encoded = self.box_combiner.encode('utf-8')
+        buf.write(struct.pack('>I', len(__box_combiner_encoded)+1))
+        buf.write(__box_combiner_encoded)
+        buf.write(b"\0")
+        buf.write(struct.pack(">iiiiiidddddii", self.box_size_from_ml, self.box_padding, self.publish_mwt, self.publish_ext, self.box_size_x, self.box_size_y, self.rate_limit, self.min_range, self.max_range, self.min_alt, self.max_alt, self.use_world_frame, self.world_frame_timeout))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -42,27 +79,30 @@ class ml_cfg_t(object):
         if buf.read(8) != ml_cfg_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return ml_cfg_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = ml_cfg_t()
-        self.score_threshold, self.box_deviation = struct.unpack(">ii", buf.read(8))
+        self.score_threshold, self.box_deviation, self.reinit_threshold, self.min_reinit_time, self.max_epipolar_error = struct.unpack(">iiiii", buf.read(20))
         __model_name_len = struct.unpack('>I', buf.read(4))[0]
         self.model_name = buf.read(__model_name_len)[:-1].decode('utf-8', 'replace')
-        self.framerate, self.exit_app = struct.unpack(">ii", buf.read(8))
+        __target_class_len = struct.unpack('>I', buf.read(4))[0]
+        self.target_class = buf.read(__target_class_len)[:-1].decode('utf-8', 'replace')
+        __tracker_type_len = struct.unpack('>I', buf.read(4))[0]
+        self.tracker_type = buf.read(__tracker_type_len)[:-1].decode('utf-8', 'replace')
+        __target_source_len = struct.unpack('>I', buf.read(4))[0]
+        self.target_source = buf.read(__target_source_len)[:-1].decode('utf-8', 'replace')
+        __box_combiner_len = struct.unpack('>I', buf.read(4))[0]
+        self.box_combiner = buf.read(__box_combiner_len)[:-1].decode('utf-8', 'replace')
+        self.box_size_from_ml, self.box_padding, self.publish_mwt, self.publish_ext, self.box_size_x, self.box_size_y, self.rate_limit, self.min_range, self.max_range, self.min_alt, self.max_alt, self.use_world_frame, self.world_frame_timeout = struct.unpack(">iiiiiidddddii", buf.read(72))
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if ml_cfg_t in parents: return 0
-        tmphash = (0x7cd89df23c4535ff) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash = (0x1c7f31ec7e6a864d) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -70,5 +110,9 @@ class ml_cfg_t(object):
         if ml_cfg_t._packed_fingerprint is None:
             ml_cfg_t._packed_fingerprint = struct.pack(">Q", ml_cfg_t._get_hash_recursive([]))
         return ml_cfg_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", ml_cfg_t._get_packed_fingerprint())[0]
+

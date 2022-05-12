@@ -9,9 +9,12 @@ except ImportError:
     from io import BytesIO
 import struct
 
-
 class bounding_box_t(object):
-    __slots__ = ["left", "top", "width", "height", "num_classes", "scores", "class_name"]
+    __slots__ = ["left", "top", "width", "height", "num_classes", "scores", "class_name", "aux"]
+
+    __typenames__ = ["double", "double", "double", "double", "int8_t", "double", "string", "string"]
+
+    __dimensions__ = [None, None, None, None, None, ["num_classes"], None, None]
 
     def __init__(self):
         self.left = 0.0
@@ -21,6 +24,7 @@ class bounding_box_t(object):
         self.num_classes = 0
         self.scores = []
         self.class_name = ""
+        self.aux = ""
 
     def encode(self):
         buf = BytesIO()
@@ -32,8 +36,12 @@ class bounding_box_t(object):
         buf.write(struct.pack(">ddddb", self.left, self.top, self.width, self.height, self.num_classes))
         buf.write(struct.pack('>%dd' % self.num_classes, *self.scores[:self.num_classes]))
         __class_name_encoded = self.class_name.encode('utf-8')
-        buf.write(struct.pack('>I', len(__class_name_encoded) + 1))
+        buf.write(struct.pack('>I', len(__class_name_encoded)+1))
         buf.write(__class_name_encoded)
+        buf.write(b"\0")
+        __aux_encoded = self.aux.encode('utf-8')
+        buf.write(struct.pack('>I', len(__aux_encoded)+1))
+        buf.write(__aux_encoded)
         buf.write(b"\0")
 
     def decode(data):
@@ -44,7 +52,6 @@ class bounding_box_t(object):
         if buf.read(8) != bounding_box_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return bounding_box_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -53,18 +60,16 @@ class bounding_box_t(object):
         self.scores = struct.unpack('>%dd' % self.num_classes, buf.read(self.num_classes * 8))
         __class_name_len = struct.unpack('>I', buf.read(4))[0]
         self.class_name = buf.read(__class_name_len)[:-1].decode('utf-8', 'replace')
+        __aux_len = struct.unpack('>I', buf.read(4))[0]
+        self.aux = buf.read(__aux_len)[:-1].decode('utf-8', 'replace')
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if bounding_box_t in parents: return 0
-        tmphash = (0x76416b29cdb9c76c) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash = (0xa1ffe56848a53096) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -72,5 +77,9 @@ class bounding_box_t(object):
         if bounding_box_t._packed_fingerprint is None:
             bounding_box_t._packed_fingerprint = struct.pack(">Q", bounding_box_t._get_hash_recursive([]))
         return bounding_box_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", bounding_box_t._get_packed_fingerprint())[0]
+

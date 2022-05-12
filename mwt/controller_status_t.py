@@ -9,9 +9,12 @@ except ImportError:
     from io import BytesIO
 import struct
 
-
 class controller_status_t(object):
     __slots__ = ["cmd", "measure", "integral", "derivative", "output", "kp", "ki", "kd", "tau", "output_scale"]
+
+    __typenames__ = ["double", "double", "double", "double", "double", "double", "double", "double", "double", "double"]
+
+    __dimensions__ = [None, None, None, None, None, None, None, None, None, None]
 
     def __init__(self):
         self.cmd = 0.0
@@ -32,9 +35,7 @@ class controller_status_t(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(
-            struct.pack(">dddddddddd", self.cmd, self.measure, self.integral, self.derivative, self.output, self.kp,
-                        self.ki, self.kd, self.tau, self.output_scale))
+        buf.write(struct.pack(">dddddddddd", self.cmd, self.measure, self.integral, self.derivative, self.output, self.kp, self.ki, self.kd, self.tau, self.output_scale))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -44,25 +45,19 @@ class controller_status_t(object):
         if buf.read(8) != controller_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return controller_status_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = controller_status_t()
-        self.cmd, self.measure, self.integral, self.derivative, self.output, self.kp, self.ki, self.kd, self.tau, self.output_scale = struct.unpack(
-            ">dddddddddd", buf.read(80))
+        self.cmd, self.measure, self.integral, self.derivative, self.output, self.kp, self.ki, self.kd, self.tau, self.output_scale = struct.unpack(">dddddddddd", buf.read(80))
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if controller_status_t in parents: return 0
         tmphash = (0xc07e52da64ca459e) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -70,5 +65,9 @@ class controller_status_t(object):
         if controller_status_t._packed_fingerprint is None:
             controller_status_t._packed_fingerprint = struct.pack(">Q", controller_status_t._get_hash_recursive([]))
         return controller_status_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", controller_status_t._get_packed_fingerprint())[0]
+

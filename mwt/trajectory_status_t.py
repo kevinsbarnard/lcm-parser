@@ -9,9 +9,12 @@ except ImportError:
     from io import BytesIO
 import struct
 
-
 class trajectory_status_t(object):
     __slots__ = ["set_point", "goal", "slew_rate", "is_moving"]
+
+    __typenames__ = ["double", "double", "double", "boolean"]
+
+    __dimensions__ = [None, None, None, None]
 
     def __init__(self):
         self.set_point = 0.0
@@ -36,7 +39,6 @@ class trajectory_status_t(object):
         if buf.read(8) != trajectory_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return trajectory_status_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -44,17 +46,13 @@ class trajectory_status_t(object):
         self.set_point, self.goal, self.slew_rate = struct.unpack(">ddd", buf.read(24))
         self.is_moving = bool(struct.unpack('b', buf.read(1))[0])
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if trajectory_status_t in parents: return 0
         tmphash = (0x586cfc74548ee6ff) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -62,5 +60,9 @@ class trajectory_status_t(object):
         if trajectory_status_t._packed_fingerprint is None:
             trajectory_status_t._packed_fingerprint = struct.pack(">Q", trajectory_status_t._get_hash_recursive([]))
         return trajectory_status_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", trajectory_status_t._get_packed_fingerprint())[0]
+

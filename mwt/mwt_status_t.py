@@ -11,12 +11,12 @@ import struct
 
 import mwt.header_t
 
-
 class mwt_status_t(object):
-    __slots__ = ["header", "tracking_mode", "check_epi_err", "check_euc_dist", "use_wf_tracking", "epi_err", "euc_dist",
-                 "max_epi_err", "max_euc_dist", "current_vf_x", "current_vf_y", "current_vf_z", "current_wf_x",
-                 "current_wf_y", "current_wf_z", "filter_cached_vf", "filter_cached_wf", "cached_vf_x", "cached_vf_y",
-                 "cached_vf_z", "cached_wf_x", "cached_wf_y", "cached_wf_z", "target_source"]
+    __slots__ = ["header", "tracking_mode", "check_epi_err", "check_euc_dist", "use_wf_tracking", "epi_err", "euc_dist", "max_epi_err", "max_euc_dist", "current_vf_x", "current_vf_y", "current_vf_z", "current_wf_x", "current_wf_y", "current_wf_z", "filter_cached_vf", "filter_cached_wf", "cached_vf_x", "cached_vf_y", "cached_vf_z", "cached_wf_x", "cached_wf_y", "cached_wf_z", "target_source"]
+
+    __typenames__ = ["mwt.header_t", "int32_t", "boolean", "boolean", "boolean", "double", "double", "double", "double", "double", "double", "double", "double", "double", "double", "boolean", "boolean", "double", "double", "double", "double", "double", "double", "double"]
+
+    __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 
     def __init__(self):
         self.header = mwt.header_t()
@@ -53,12 +53,7 @@ class mwt_status_t(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == mwt.header_t._get_packed_fingerprint()
         self.header._encode_one(buf)
-        buf.write(struct.pack(">ibbbddddddddddbbddddddd", self.tracking_mode, self.check_epi_err, self.check_euc_dist,
-                              self.use_wf_tracking, self.epi_err, self.euc_dist, self.max_epi_err, self.max_euc_dist,
-                              self.current_vf_x, self.current_vf_y, self.current_vf_z, self.current_wf_x,
-                              self.current_wf_y, self.current_wf_z, self.filter_cached_vf, self.filter_cached_wf,
-                              self.cached_vf_x, self.cached_vf_y, self.cached_vf_z, self.cached_wf_x, self.cached_wf_y,
-                              self.cached_wf_z, self.target_source))
+        buf.write(struct.pack(">ibbbddddddddddbbddddddd", self.tracking_mode, self.check_epi_err, self.check_euc_dist, self.use_wf_tracking, self.epi_err, self.euc_dist, self.max_epi_err, self.max_euc_dist, self.current_vf_x, self.current_vf_y, self.current_vf_z, self.current_wf_x, self.current_wf_y, self.current_wf_z, self.filter_cached_vf, self.filter_cached_wf, self.cached_vf_x, self.cached_vf_y, self.cached_vf_z, self.cached_wf_x, self.cached_wf_y, self.cached_wf_z, self.target_source))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -68,7 +63,6 @@ class mwt_status_t(object):
         if buf.read(8) != mwt_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return mwt_status_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
@@ -78,25 +72,19 @@ class mwt_status_t(object):
         self.check_epi_err = bool(struct.unpack('b', buf.read(1))[0])
         self.check_euc_dist = bool(struct.unpack('b', buf.read(1))[0])
         self.use_wf_tracking = bool(struct.unpack('b', buf.read(1))[0])
-        self.epi_err, self.euc_dist, self.max_epi_err, self.max_euc_dist, self.current_vf_x, self.current_vf_y, self.current_vf_z, self.current_wf_x, self.current_wf_y, self.current_wf_z = struct.unpack(
-            ">dddddddddd", buf.read(80))
+        self.epi_err, self.euc_dist, self.max_epi_err, self.max_euc_dist, self.current_vf_x, self.current_vf_y, self.current_vf_z, self.current_wf_x, self.current_wf_y, self.current_wf_z = struct.unpack(">dddddddddd", buf.read(80))
         self.filter_cached_vf = bool(struct.unpack('b', buf.read(1))[0])
         self.filter_cached_wf = bool(struct.unpack('b', buf.read(1))[0])
-        self.cached_vf_x, self.cached_vf_y, self.cached_vf_z, self.cached_wf_x, self.cached_wf_y, self.cached_wf_z, self.target_source = struct.unpack(
-            ">ddddddd", buf.read(56))
+        self.cached_vf_x, self.cached_vf_y, self.cached_vf_z, self.cached_wf_x, self.cached_wf_y, self.cached_wf_z, self.target_source = struct.unpack(">ddddddd", buf.read(56))
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if mwt_status_t in parents: return 0
         newparents = parents + [mwt_status_t]
         tmphash = (0x719d1b6bb7fe59d7 + mwt.header_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -104,5 +92,9 @@ class mwt_status_t(object):
         if mwt_status_t._packed_fingerprint is None:
             mwt_status_t._packed_fingerprint = struct.pack(">Q", mwt_status_t._get_hash_recursive([]))
         return mwt_status_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", mwt_status_t._get_packed_fingerprint())[0]
+

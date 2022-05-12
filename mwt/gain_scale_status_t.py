@@ -9,9 +9,12 @@ except ImportError:
     from io import BytesIO
 import struct
 
-
 class gain_scale_status_t(object):
     __slots__ = ["enabled", "kp_in", "ki_in", "kd_in", "kp_out", "ki_out", "kd_out"]
+
+    __typenames__ = ["boolean", "double", "double", "double", "double", "double", "double"]
+
+    __dimensions__ = [None, None, None, None, None, None, None]
 
     def __init__(self):
         self.enabled = False
@@ -29,8 +32,7 @@ class gain_scale_status_t(object):
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">bdddddd", self.enabled, self.kp_in, self.ki_in, self.kd_in, self.kp_out, self.ki_out,
-                              self.kd_out))
+        buf.write(struct.pack(">bdddddd", self.enabled, self.kp_in, self.ki_in, self.kd_in, self.kp_out, self.ki_out, self.kd_out))
 
     def decode(data):
         if hasattr(data, 'read'):
@@ -40,26 +42,20 @@ class gain_scale_status_t(object):
         if buf.read(8) != gain_scale_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
         return gain_scale_status_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = gain_scale_status_t()
         self.enabled = bool(struct.unpack('b', buf.read(1))[0])
-        self.kp_in, self.ki_in, self.kd_in, self.kp_out, self.ki_out, self.kd_out = struct.unpack(">dddddd",
-                                                                                                  buf.read(48))
+        self.kp_in, self.ki_in, self.kd_in, self.kp_out, self.ki_out, self.kd_out = struct.unpack(">dddddd", buf.read(48))
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if gain_scale_status_t in parents: return 0
         tmphash = (0x58056ad4bf4807c7) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -67,5 +63,9 @@ class gain_scale_status_t(object):
         if gain_scale_status_t._packed_fingerprint is None:
             gain_scale_status_t._packed_fingerprint = struct.pack(">Q", gain_scale_status_t._get_hash_recursive([]))
         return gain_scale_status_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", gain_scale_status_t._get_packed_fingerprint())[0]
+

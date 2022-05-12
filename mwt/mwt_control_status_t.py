@@ -9,54 +9,59 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import mwt.gain_scale_status_t
-
-import mwt.header_t
-
-import mwt.filter_status_t
-
 import mwt.controller_status_t
 
 import mwt.trajectory_status_t
 
+import mwt.filter_status_t
+
+import mwt.filter_rl_status_t
+
+import mwt.gain_scale_status_t
+
+import mwt.header_t
 
 class mwt_control_status_t(object):
-    __slots__ = ["header", "range_control", "lateral_control", "vertical_control", "bearing_control", "range_traj",
-                 "lateral_traj", "vertical_traj", "bearing_traj", "range_filter", "lateral_filter", "vertical_filter",
-                 "bearing_filter", "range_gs_filter", "heading_gs_filter", "bearing_gs_filter", "lateral_gs",
-                 "bearing_gs", "is_pilot_enabled", "is_control_enabled", "is_x_effort_enabled", "is_y_effort_enabled",
-                 "is_z_effort_enabled", "is_psi_effort_enabled", "control_exec_ms", "other_exec_ms", "percent_idle",
-                 "missed_updates"]
+    __slots__ = ["header", "x_control", "y_control", "z_control", "yaw_control", "x_traj", "y_traj", "z_traj", "yaw_traj", "range_filter", "heading_filter", "z_target_filter", "bearing_filter", "range_gs_filter", "heading_gs_filter", "bearing_gs_filter", "x_effort_filter", "y_effort_filter", "z_effort_filter", "yaw_effort_filter", "lateral_gs", "bearing_gs", "is_pilot_enabled", "control_mode", "is_x_effort_enabled", "is_y_effort_enabled", "is_z_effort_enabled", "is_yaw_effort_enabled", "control_exec_ms", "other_exec_ms", "percent_idle", "missed_updates", "proc_req_max"]
+
+    __typenames__ = ["mwt.header_t", "mwt.controller_status_t", "mwt.controller_status_t", "mwt.controller_status_t", "mwt.controller_status_t", "mwt.trajectory_status_t", "mwt.trajectory_status_t", "mwt.trajectory_status_t", "mwt.trajectory_status_t", "mwt.filter_rl_status_t", "mwt.filter_status_t", "mwt.filter_rl_status_t", "mwt.filter_rl_status_t", "mwt.filter_status_t", "mwt.filter_status_t", "mwt.filter_status_t", "mwt.filter_rl_status_t", "mwt.filter_rl_status_t", "mwt.filter_rl_status_t", "mwt.filter_rl_status_t", "mwt.gain_scale_status_t", "mwt.gain_scale_status_t", "boolean", "int32_t", "boolean", "boolean", "boolean", "boolean", "double", "double", "double", "int64_t", "int64_t"]
+
+    __dimensions__ = [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
 
     def __init__(self):
         self.header = mwt.header_t()
-        self.range_control = mwt.controller_status_t()
-        self.lateral_control = mwt.controller_status_t()
-        self.vertical_control = mwt.controller_status_t()
-        self.bearing_control = mwt.controller_status_t()
-        self.range_traj = mwt.trajectory_status_t()
-        self.lateral_traj = mwt.trajectory_status_t()
-        self.vertical_traj = mwt.trajectory_status_t()
-        self.bearing_traj = mwt.trajectory_status_t()
-        self.range_filter = mwt.filter_status_t()
-        self.lateral_filter = mwt.filter_status_t()
-        self.vertical_filter = mwt.filter_status_t()
-        self.bearing_filter = mwt.filter_status_t()
+        self.x_control = mwt.controller_status_t()
+        self.y_control = mwt.controller_status_t()
+        self.z_control = mwt.controller_status_t()
+        self.yaw_control = mwt.controller_status_t()
+        self.x_traj = mwt.trajectory_status_t()
+        self.y_traj = mwt.trajectory_status_t()
+        self.z_traj = mwt.trajectory_status_t()
+        self.yaw_traj = mwt.trajectory_status_t()
+        self.range_filter = mwt.filter_rl_status_t
+        self.heading_filter = mwt.filter_rl_status_t
+        self.z_target_filter = mwt.filter_rl_status_t
+        self.bearing_filter = mwt.filter_rl_status_t
         self.range_gs_filter = mwt.filter_status_t()
         self.heading_gs_filter = mwt.filter_status_t()
         self.bearing_gs_filter = mwt.filter_status_t()
+        self.x_effort_filter = mwt.filter_rl_status_t
+        self.y_effort_filter = mwt.filter_rl_status_t
+        self.z_effort_filter = mwt.filter_rl_status_t
+        self.yaw_effort_filter = mwt.filter_rl_status_t
         self.lateral_gs = mwt.gain_scale_status_t()
         self.bearing_gs = mwt.gain_scale_status_t()
         self.is_pilot_enabled = False
-        self.is_control_enabled = False
+        self.control_mode = 0
         self.is_x_effort_enabled = False
         self.is_y_effort_enabled = False
         self.is_z_effort_enabled = False
-        self.is_psi_effort_enabled = False
+        self.is_yaw_effort_enabled = False
         self.control_exec_ms = 0.0
         self.other_exec_ms = 0.0
         self.percent_idle = 0.0
         self.missed_updates = 0
+        self.proc_req_max = 0
 
     def encode(self):
         buf = BytesIO()
@@ -67,29 +72,29 @@ class mwt_control_status_t(object):
     def _encode_one(self, buf):
         assert self.header._get_packed_fingerprint() == mwt.header_t._get_packed_fingerprint()
         self.header._encode_one(buf)
-        assert self.range_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
-        self.range_control._encode_one(buf)
-        assert self.lateral_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
-        self.lateral_control._encode_one(buf)
-        assert self.vertical_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
-        self.vertical_control._encode_one(buf)
-        assert self.bearing_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
-        self.bearing_control._encode_one(buf)
-        assert self.range_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
-        self.range_traj._encode_one(buf)
-        assert self.lateral_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
-        self.lateral_traj._encode_one(buf)
-        assert self.vertical_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
-        self.vertical_traj._encode_one(buf)
-        assert self.bearing_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
-        self.bearing_traj._encode_one(buf)
-        assert self.range_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
+        assert self.x_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
+        self.x_control._encode_one(buf)
+        assert self.y_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
+        self.y_control._encode_one(buf)
+        assert self.z_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
+        self.z_control._encode_one(buf)
+        assert self.yaw_control._get_packed_fingerprint() == mwt.controller_status_t._get_packed_fingerprint()
+        self.yaw_control._encode_one(buf)
+        assert self.x_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
+        self.x_traj._encode_one(buf)
+        assert self.y_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
+        self.y_traj._encode_one(buf)
+        assert self.z_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
+        self.z_traj._encode_one(buf)
+        assert self.yaw_traj._get_packed_fingerprint() == mwt.trajectory_status_t._get_packed_fingerprint()
+        self.yaw_traj._encode_one(buf)
+        assert self.range_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
         self.range_filter._encode_one(buf)
-        assert self.lateral_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
-        self.lateral_filter._encode_one(buf)
-        assert self.vertical_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
-        self.vertical_filter._encode_one(buf)
-        assert self.bearing_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
+        assert self.heading_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
+        self.heading_filter._encode_one(buf)
+        assert self.z_target_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
+        self.z_target_filter._encode_one(buf)
+        assert self.bearing_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
         self.bearing_filter._encode_one(buf)
         assert self.range_gs_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
         self.range_gs_filter._encode_one(buf)
@@ -97,80 +102,71 @@ class mwt_control_status_t(object):
         self.heading_gs_filter._encode_one(buf)
         assert self.bearing_gs_filter._get_packed_fingerprint() == mwt.filter_status_t._get_packed_fingerprint()
         self.bearing_gs_filter._encode_one(buf)
+        assert self.x_effort_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
+        self.x_effort_filter._encode_one(buf)
+        assert self.y_effort_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
+        self.y_effort_filter._encode_one(buf)
+        assert self.z_effort_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
+        self.z_effort_filter._encode_one(buf)
+        assert self.yaw_effort_filter._get_packed_fingerprint() == mwt.filter_rl_status_t._get_packed_fingerprint()
+        self.yaw_effort_filter._encode_one(buf)
         assert self.lateral_gs._get_packed_fingerprint() == mwt.gain_scale_status_t._get_packed_fingerprint()
         self.lateral_gs._encode_one(buf)
         assert self.bearing_gs._get_packed_fingerprint() == mwt.gain_scale_status_t._get_packed_fingerprint()
         self.bearing_gs._encode_one(buf)
-        buf.write(struct.pack(">bbbbbbdddq", self.is_pilot_enabled, self.is_control_enabled, self.is_x_effort_enabled,
-                              self.is_y_effort_enabled, self.is_z_effort_enabled, self.is_psi_effort_enabled,
-                              self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates))
+        buf.write(struct.pack(">bibbbbdddqq", self.is_pilot_enabled, self.control_mode, self.is_x_effort_enabled, self.is_y_effort_enabled, self.is_z_effort_enabled, self.is_yaw_effort_enabled, self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates, self.proc_req_max))
 
     def decode(data):
         if hasattr(data, 'read'):
             buf = data
         else:
             buf = BytesIO(data)
-        if buf.read(8) != mwt_control_status_t._get_packed_fingerprint():
-            raise ValueError("Decode error")
+            buf.read(8)
+        # if buf.read(8) != mwt_control_status_t._get_packed_fingerprint():
+        #     raise ValueError("Decode error")
         return mwt_control_status_t._decode_one(buf)
-
     decode = staticmethod(decode)
 
     def _decode_one(buf):
         self = mwt_control_status_t()
         self.header = mwt.header_t._decode_one(buf)
-        self.range_control = mwt.controller_status_t._decode_one(buf)
-        self.lateral_control = mwt.controller_status_t._decode_one(buf)
-        self.vertical_control = mwt.controller_status_t._decode_one(buf)
-        self.bearing_control = mwt.controller_status_t._decode_one(buf)
-        self.range_traj = mwt.trajectory_status_t._decode_one(buf)
-        self.lateral_traj = mwt.trajectory_status_t._decode_one(buf)
-        self.vertical_traj = mwt.trajectory_status_t._decode_one(buf)
-        self.bearing_traj = mwt.trajectory_status_t._decode_one(buf)
-        self.range_filter = mwt.filter_status_t._decode_one(buf)
-        self.lateral_filter = mwt.filter_status_t._decode_one(buf)
-        self.vertical_filter = mwt.filter_status_t._decode_one(buf)
-        self.bearing_filter = mwt.filter_status_t._decode_one(buf)
+        self.x_control = mwt.controller_status_t._decode_one(buf)
+        self.y_control = mwt.controller_status_t._decode_one(buf)
+        self.z_control = mwt.controller_status_t._decode_one(buf)
+        self.yaw_control = mwt.controller_status_t._decode_one(buf)
+        self.x_traj = mwt.trajectory_status_t._decode_one(buf)
+        self.y_traj = mwt.trajectory_status_t._decode_one(buf)
+        self.z_traj = mwt.trajectory_status_t._decode_one(buf)
+        self.yaw_traj = mwt.trajectory_status_t._decode_one(buf)
+        self.range_filter = mwt.filter_rl_status_t._decode_one(buf)
+        self.heading_filter = mwt.filter_status_t._decode_one(buf)
+        self.z_target_filter = mwt.filter_rl_status_t._decode_one(buf)
+        self.bearing_filter = mwt.filter_rl_status_t._decode_one(buf)
         self.range_gs_filter = mwt.filter_status_t._decode_one(buf)
         self.heading_gs_filter = mwt.filter_status_t._decode_one(buf)
         self.bearing_gs_filter = mwt.filter_status_t._decode_one(buf)
+        self.x_effort_filter = mwt.filter_rl_status_t._decode_one(buf)
+        self.y_effort_filter = mwt.filter_rl_status_t._decode_one(buf)
+        self.z_effort_filter = mwt.filter_rl_status_t._decode_one(buf)
+        self.yaw_effort_filter = mwt.filter_rl_status_t._decode_one(buf)
         self.lateral_gs = mwt.gain_scale_status_t._decode_one(buf)
         self.bearing_gs = mwt.gain_scale_status_t._decode_one(buf)
         self.is_pilot_enabled = bool(struct.unpack('b', buf.read(1))[0])
-        self.is_control_enabled = bool(struct.unpack('b', buf.read(1))[0])
+        self.control_mode = struct.unpack(">i", buf.read(4))[0]
         self.is_x_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
         self.is_y_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
         self.is_z_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
-        self.is_psi_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
-        self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates = struct.unpack(">dddq",
-                                                                                                         buf.read(32))
+        self.is_yaw_effort_enabled = bool(struct.unpack('b', buf.read(1))[0])
+        self.control_exec_ms, self.other_exec_ms, self.percent_idle, self.missed_updates, self.proc_req_max = struct.unpack(">dddqq", buf.read(40))
         return self
-
     _decode_one = staticmethod(_decode_one)
-
-    _hash = None
 
     def _get_hash_recursive(parents):
         if mwt_control_status_t in parents: return 0
         newparents = parents + [mwt_control_status_t]
-        tmphash = (0xcfdb15991e731c60 + mwt.header_t._get_hash_recursive(
-            newparents) + mwt.controller_status_t._get_hash_recursive(
-            newparents) + mwt.controller_status_t._get_hash_recursive(
-            newparents) + mwt.controller_status_t._get_hash_recursive(
-            newparents) + mwt.controller_status_t._get_hash_recursive(
-            newparents) + mwt.trajectory_status_t._get_hash_recursive(
-            newparents) + mwt.trajectory_status_t._get_hash_recursive(
-            newparents) + mwt.trajectory_status_t._get_hash_recursive(
-            newparents) + mwt.trajectory_status_t._get_hash_recursive(
-            newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(
-            newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(
-            newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(
-            newparents) + mwt.filter_status_t._get_hash_recursive(
-            newparents) + mwt.gain_scale_status_t._get_hash_recursive(
-            newparents) + mwt.gain_scale_status_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
-        tmphash = (((tmphash << 1) & 0xffffffffffffffff) + (tmphash >> 63)) & 0xffffffffffffffff
+        tmphash = (0xbcab33dffb264586 + mwt.header_t._get_hash_recursive(newparents) + mwt.controller_status_t._get_hash_recursive(newparents) + mwt.controller_status_t._get_hash_recursive(newparents) + mwt.controller_status_t._get_hash_recursive(newparents) + mwt.controller_status_t._get_hash_recursive(newparents) + mwt.trajectory_status_t._get_hash_recursive(newparents) + mwt.trajectory_status_t._get_hash_recursive(newparents) + mwt.trajectory_status_t._get_hash_recursive(newparents) + mwt.trajectory_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.filter_rl_status_t._get_hash_recursive(newparents) + mwt.gain_scale_status_t._get_hash_recursive(newparents) + mwt.gain_scale_status_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
-
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
@@ -178,5 +174,9 @@ class mwt_control_status_t(object):
         if mwt_control_status_t._packed_fingerprint is None:
             mwt_control_status_t._packed_fingerprint = struct.pack(">Q", mwt_control_status_t._get_hash_recursive([]))
         return mwt_control_status_t._packed_fingerprint
-
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
+
+    def get_hash(self):
+        """Get the LCM hash of the struct"""
+        return struct.unpack(">Q", mwt_control_status_t._get_packed_fingerprint())[0]
+

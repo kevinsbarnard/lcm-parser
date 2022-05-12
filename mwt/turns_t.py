@@ -9,57 +9,56 @@ except ImportError:
     from io import BytesIO
 import struct
 
-class dspl_cfg_t(object):
-    __slots__ = ["lout", "port"]
+class turns_t(object):
+    __slots__ = ["turns"]
 
-    __typenames__ = ["int8_t", "int32_t"]
+    __typenames__ = ["double"]
 
-    __dimensions__ = [None, None]
+    __dimensions__ = [None]
 
     def __init__(self):
-        self.lout = 0
-        self.port = 0
+        self.turns = 0.0
 
     def encode(self):
         buf = BytesIO()
-        buf.write(dspl_cfg_t._get_packed_fingerprint())
+        buf.write(turns_t._get_packed_fingerprint())
         self._encode_one(buf)
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">bi", self.lout, self.port))
+        buf.write(struct.pack(">d", self.turns))
 
     def decode(data):
         if hasattr(data, 'read'):
             buf = data
         else:
             buf = BytesIO(data)
-        if buf.read(8) != dspl_cfg_t._get_packed_fingerprint():
+        if buf.read(8) != turns_t._get_packed_fingerprint():
             raise ValueError("Decode error")
-        return dspl_cfg_t._decode_one(buf)
+        return turns_t._decode_one(buf)
     decode = staticmethod(decode)
 
     def _decode_one(buf):
-        self = dspl_cfg_t()
-        self.lout, self.port = struct.unpack(">bi", buf.read(5))
+        self = turns_t()
+        self.turns = struct.unpack(">d", buf.read(8))[0]
         return self
     _decode_one = staticmethod(_decode_one)
 
     def _get_hash_recursive(parents):
-        if dspl_cfg_t in parents: return 0
-        tmphash = (0xd80bd76d25c7a1f7) & 0xffffffffffffffff
+        if turns_t in parents: return 0
+        tmphash = (0x4cab85a1b2ae8a48) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
     def _get_packed_fingerprint():
-        if dspl_cfg_t._packed_fingerprint is None:
-            dspl_cfg_t._packed_fingerprint = struct.pack(">Q", dspl_cfg_t._get_hash_recursive([]))
-        return dspl_cfg_t._packed_fingerprint
+        if turns_t._packed_fingerprint is None:
+            turns_t._packed_fingerprint = struct.pack(">Q", turns_t._get_hash_recursive([]))
+        return turns_t._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
 
     def get_hash(self):
         """Get the LCM hash of the struct"""
-        return struct.unpack(">Q", dspl_cfg_t._get_packed_fingerprint())[0]
+        return struct.unpack(">Q", turns_t._get_packed_fingerprint())[0]
 

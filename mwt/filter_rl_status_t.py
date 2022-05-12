@@ -9,58 +9,56 @@ except ImportError:
     from io import BytesIO
 import struct
 
-class filter_status_t(object):
-    __slots__ = ["input", "output", "tau"]
+class filter_rl_status_t(object):
+    __slots__ = ["input", "output", "tau", "max_rate"]
 
-    __typenames__ = ["double", "double", "double"]
+    __typenames__ = ["double", "double", "double", "double"]
 
-    __dimensions__ = [None, None, None]
+    __dimensions__ = [None, None, None, None]
 
     def __init__(self):
         self.input = 0.0
         self.output = 0.0
         self.tau = 0.0
+        self.max_rate = 0.0
 
     def encode(self):
         buf = BytesIO()
-        buf.write(filter_status_t._get_packed_fingerprint())
+        buf.write(filter_rl_status_t._get_packed_fingerprint())
         self._encode_one(buf)
         return buf.getvalue()
 
     def _encode_one(self, buf):
-        buf.write(struct.pack(">ddd", self.input, self.output, self.tau))
+        buf.write(struct.pack(">dddd", self.input, self.output, self.tau, self.max_rate))
 
     def decode(data):
         if hasattr(data, 'read'):
             buf = data
         else:
             buf = BytesIO(data)
-        if buf.read(8) != filter_status_t._get_packed_fingerprint():
+        if buf.read(8) != filter_rl_status_t._get_packed_fingerprint():
             raise ValueError("Decode error")
-        return filter_status_t._decode_one(buf)
+        return filter_rl_status_t._decode_one(buf)
     decode = staticmethod(decode)
 
     def _decode_one(buf):
-        self = filter_status_t()
-        self.input, self.output, self.tau = struct.unpack(">ddd", buf.read(24))
+        self = filter_rl_status_t()
+        self.input, self.output, self.tau, self.max_rate = struct.unpack(">dddd", buf.read(32))
         return self
     _decode_one = staticmethod(_decode_one)
 
+    _hash = None
     def _get_hash_recursive(parents):
-        if filter_status_t in parents: return 0
-        tmphash = (0x302fe57b7736ae94) & 0xffffffffffffffff
+        if filter_rl_status_t in parents: return 0
+        tmphash = (0x9dbb6a272015ced9) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
     _packed_fingerprint = None
 
     def _get_packed_fingerprint():
-        if filter_status_t._packed_fingerprint is None:
-            filter_status_t._packed_fingerprint = struct.pack(">Q", filter_status_t._get_hash_recursive([]))
-        return filter_status_t._packed_fingerprint
+        if filter_rl_status_t._packed_fingerprint is None:
+            filter_rl_status_t._packed_fingerprint = struct.pack(">Q", filter_rl_status_t._get_hash_recursive([]))
+        return filter_rl_status_t._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
-
-    def get_hash(self):
-        """Get the LCM hash of the struct"""
-        return struct.unpack(">Q", filter_status_t._get_packed_fingerprint())[0]
 
