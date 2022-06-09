@@ -33,6 +33,7 @@ from .stereo_image_t import stereo_image_t
 from .stereo_image_with_boxes_t import stereo_image_with_boxes_t
 from .string_t import string_t
 from .supervisor_cfg_t import supervisor_cfg_t
+from .supervisor_cfg_t_new import supervisor_cfg_t_new
 from .trajectory_status_t import trajectory_status_t
 from .turns_t import turns_t
 from .vehicle_cmd_t import vehicle_cmd_t
