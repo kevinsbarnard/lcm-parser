@@ -1,0 +1,4 @@
+plotly
+progressbar2
+pandas
+numpy
