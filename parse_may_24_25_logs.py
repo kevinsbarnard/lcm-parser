@@ -1,11 +1,10 @@
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+"""
+Parse the May 24-25 LCM logs (on Atlas) into JSON.
+"""
 
 from pathlib import Path
 
-from scripts.parse import parse_log
-
+from lib.parse import parse_log
 
 
 LOG_PATH_STRINGS = r'''\\atlas.shore.mbari.org\BioInspirLabData\210517-25_RC_MiniROV\lcmLogs.May.24.2021\lcmlog-2021-05-24.00
@@ -43,13 +42,17 @@ LOG_PATH_STRINGS = r'''\\atlas.shore.mbari.org\BioInspirLabData\210517-25_RC_Min
 
 LOG_PATHS = list(map(Path, LOG_PATH_STRINGS))
 
-OLD_CFG_LOG_PATHS = LOG_PATHS[:19]
-NEW_CFG_LOG_PATHS = LOG_PATHS[19:]
+# SUPERVISOR_CFG type was changed part way through. Split paths into two partitions.
+SPLIT_IDX = 19
+OLD_CFG_LOG_PATHS = LOG_PATHS[:SPLIT_IDX]
+NEW_CFG_LOG_PATHS = LOG_PATHS[SPLIT_IDX:]
 
-OLD_CFG_PATH = 'extra_json/mlt_channels.json'
-NEW_CFG_PATH = 'extra_json/mlt_channels_new.json'
+JSON_DIR = Path('data/json/')
+OLD_CFG_PATH = JSON_DIR / 'ml_tracking_channel_map.json'
+NEW_CFG_PATH = JSON_DIR / 'ml_tracking_channel_map_alt.json'
 
-OUTPUT_DIR = Path('extracted_logs/')
+# Where to save the output data
+OUTPUT_DIR = Path('data/json/parsed_lcm/')
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 OLD_CFG_PATH_LIST = len(OLD_CFG_LOG_PATHS) * [OLD_CFG_PATH]
@@ -58,7 +61,11 @@ NEW_CFG_PATH_LIST = len(NEW_CFG_LOG_PATHS) * [NEW_CFG_PATH]
 def get_output_path(log_path):
     return OUTPUT_DIR / (log_path.name + '.json')
 
-for log_path, cfg_path in list(zip(LOG_PATHS, OLD_CFG_PATH_LIST + NEW_CFG_PATH_LIST))[19:]:
+# Parse
+for log_path, cfg_path in zip(LOG_PATHS, OLD_CFG_PATH_LIST + NEW_CFG_PATH_LIST):
     output_path = get_output_path(log_path)
+    if output_path.exists():
+        print(f'Skipping {log_path} as its target output file {output_path} already exists.')
+        continue
     print(f'Extracting {log_path} to {output_path}')
     parse_log(log_path, cfg_path, output_path)
